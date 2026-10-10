@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function() {
+        try {
+          var originalFetch = window.fetch;
+          var fetchHolder = originalFetch;
+
+          // Make window.fetch unconditionally assignable with getter & setter
+          try {
+            Object.defineProperty(window, 'fetch', {
+              configurable: true,
+              enumerable: true,
+              get: function() {
+                return fetchHolder;
+              },
+              set: function(newFetch) {
+                fetchHolder = newFetch;
+              }
+            });
+          } catch (e1) {
+            try {
+              window.fetch = originalFetch;
+            } catch (e2) {}
+          }
+
+          // Walk prototype chain to ensure any getter-only 'fetch' allows writes
+          try {
+            var curr = window;
+            while (curr) {
+              var desc = Object.getOwnPropertyDescriptor(curr, 'fetch');
+              if (desc && !desc.set) {
+                try {
+                  Object.defineProperty(curr, 'fetch', {
+                    configurable: true,
+                    enumerable: true,
+                    get: function() { return fetchHolder; },
+                    set: function(v) { fetchHolder = v; }
+                  });
+                } catch (pe) {}
+              }
+              curr = Object.getPrototypeOf(curr);
+            }
+          } catch (e3) {}
+        } catch (_) {}
+
+        // Global safeguard: prevent chrome-extension internal errors from bubbling
+        window.addEventListener('error', function(e) {
+          if (
+            (e.filename && e.filename.indexOf('chrome-extension://') !== -1) ||
+            (e.message && e.message.indexOf('Cannot set property fetch') !== -1)
+          ) {
+            e.preventDefault();
+            if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+            return true;
+          }
+        }, true);
+
+        window.addEventListener('unhandledrejection', function(e) {
+          var reason = e.reason;
+          if (
+            reason &&
+            ((reason.stack && reason.stack.indexOf('chrome-extension://') !== -1) ||
+             (reason.message && reason.message.indexOf('Cannot set property fetch') !== -1))
+          ) {
+            e.preventDefault();
+            if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+          }
+        }, true);
+      })();
+    </script>
+    <title>TradePulse - Professional Trading Journal &amp; Analytics</title>
+    <meta name="description" content="Production-ready trading journal, ledger, and risk analytics platform with multi-account tracking, playbook execution, performance calendar, and deep behavioural metrics." />
+    <meta property="og:title" content="TradePulse - Professional Trading Journal &amp; Analytics" />
+    <meta property="og:description" content="Production-ready trading journal, ledger, and risk analytics platform with multi-account tracking, playbook execution, performance calendar, and deep behavioural metrics." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

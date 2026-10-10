@@ -1,0 +1,6 @@
+{
+  "name": "TradePulse - Professional Trading Journal & Analytics",
+  "description": "Production-ready trading journal, ledger, and risk analytics platform with multi-account tracking, playbook execution, performance calendar, and deep behavioural metrics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
